@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Examen de Diagnóstico - Cálculo Diferencial 2026</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=Lato:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary-brown: #5d4037;
+            --secondary-brown: #8d6e63;
+            --light-cream: #fdfcf0;
+            --text-dark: #3e2723;
+            --white: #ffffff;
+        }
+
+        body {
+            background-color: #f4f1ea;
+            font-family: 'Lato', sans-serif;
+            color: var(--text-dark);
+            margin: 0;
+            padding: 0;
+        }
+
+        header {
+            background-color: var(--primary-brown);
+            color: var(--white);
+            padding: 30px;
+            text-align: center;
+        }
+
+        header h1 { font-family: 'Playfair Display', serif; margin: 0; font-size: 2rem; }
+
+        .container {
+            max-width: 900px;
+            margin: 20px auto;
+            background: var(--white);
+            padding: 30px;
+            border-radius: 4px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+        }
+
+        .input-group { text-align: center; margin-bottom: 30px; }
+        input[type="text"] {
+            width: 80%;
+            padding: 10px;
+            border: 1px solid var(--secondary-brown);
+            font-size: 1rem;
+        }
+
+        .question-card {
+            border-bottom: 1px solid #eee;
+            padding: 20px 0;
+        }
+
+        .question-text { font-weight: 700; font-size: 1.1rem; margin-bottom: 15px; display: block; }
+
+        .options-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+        }
+
+        .option-item {
+            cursor: pointer;
+            padding: 8px;
+            transition: background 0.2s;
+        }
+
+        .option-item:hover { background: var(--light-cream); }
+
+        .btn-submit {
+            display: block;
+            width: 100%;
+            background: var(--primary-brown);
+            color: white;
+            padding: 15px;
+            border: none;
+            font-size: 1.2rem;
+            font-weight: bold;
+            cursor: pointer;
+            margin-top: 30px;
+        }
+
+        #result-area { display: none; text-align: center; padding: 40px; }
+        .score { font-size: 4rem; color: var(--primary-brown); font-family: 'Playfair Display', serif; }
+        
+        /* Estilo para potencias y fracciones */
+        sup { font-size: 0.75em; }
+        .frac { display: inline-block; vertical-align: middle; text-align: center; }
+        .frac span { display: block; padding: 0 5px; }
+        .frac span.bottom { border-top: 1px solid black; }
+    </style>
+</head>
+<body>
+
+<header>
+    <h1>CÁLCULO DIFERENCIAL</h1>
+    <p>Campus Tlaquepaque - Ciclo C2-2026</p>
+</header>
+
+<div class="container">
+    <div id="setup">
+        <div class="input-group">
+            <p>Ingrese su nombre para comenzar el examen:</p>
+            <input type="text" id="studentName" placeholder="Nombre completo">
+        </div>
+    </div>
+
+    <form id="quizForm">
+        <div id="questions"></div>
+        <button type="button" class="btn-submit" onclick="grade()">Finalizar y Calificar</button>
+    </form>
+
+    <div id="result-area">
+        <h2 id="res-name"></h2>
+        <p>Tu puntaje:</p>
+        <div class="score" id="res-score">0</div>
+        <p>aciertos de 42</p>
+        <button class="btn-submit" style="background:#8d6e63" onclick="location.reload()">Reiniciar</button>
+    </div>
+</div>
+
+<script>
+    const examData = [
+        { id: 1, q: "1.- Resuelve: 2² * 3²", opts: ["2²", "3²", "2²", "6²"], ans: "D" },
+        { id: 2, q: "2.- 4² * 2² * 1²", opts: ["4²", "8²", "16²", "6²"], ans: "B" },
+        { id: 3, q: "3.- 36³ / 9³", opts: ["5³", "6³", "6⁷", "4³"], ans: "D" },
+        { id: 4, q: "4.- 1⁵/1² + 4³/2³", opts: ["27", "15", "14", "9"], ans: "B" },
+        { id: 5, q: "5.- 4³ * 4² / 1⁵ * 4⁵", opts: ["9", "1", "3", "4"], ans: "B" },
+        { id: 6, q: "6.- 1⁴ * 1³ / 1² * 1⁵", opts: ["5", "1", "3", "-4"], ans: "B" },
+        { id: 7, q: "7.- 4³ * 2³ / 2⁷", opts: ["3", "8", "16", "4"], ans: "D" },
+        { id: 8, q: "8.- 7⁵/² / 7⁵/²", opts: ["7", "7⁵/³", "7⁵/⁴", "1"], ans: "D" },
+        { id: 9, q: "9.- 4⁹/³ * 4⁵/³", opts: ["13", "14/15", "4¹⁴/³", "4¹⁵/³"], ans: "C" },
+        { id: 10, q: "10.- Valor de la x: 9x+8=924", opts: ["16", "12", "14", "12"], ans: "A" },
+        { id: 11, q: "11.- Valor de la x: 5³ˣ * 5⁵ = 5²⁰", opts: ["15", "12", "10", "5"], ans: "D" },
+        { id: 12, q: "12.- Valor de la x: 6ˣ / 6⁶ = 6¹⁰", opts: ["18", "12", "16", "8"], ans: "C" },
+        { id: 13, q: "13.- ¿En qué letra terminará 'COMPAÑEROS' en la posición 104?", opts: ["E", "O", "P", "Ñ"], ans: "C" },
+        { id: 14, q: "14.- ¿En qué letra terminará 'PAREJA' en la posición 65?", opts: ["R", "A", "J", "E"], ans: "C" },
+        { id: 15, q: "15.- Mediana de (3, 4, 5, 2, 3, 6, 2)", opts: ["5", "3", "2", "6"], ans: "B" },
+        { id: 16, q: "16.- Moda de (1, 2, 4, 5, 1, 2, 1, 12)", opts: ["1", "2", "5", "4"], ans: "A" },
+        { id: 17, q: "17.- Suma 36 entre 6 elementos. ¿Promedio?", opts: ["8", "12", "6", "4"], ans: "C" },
+        { id: 18, q: "18.- Promedio 12, suma 48. ¿Cuántos elementos?", opts: ["4", "6", "8", "2"], ans: "A" },
+        { id: 19, q: "19.- Promedio 10 de 5 elementos. ¿Suma total?", opts: ["15", "50", "2", "25"], ans: "B" },
+        { id: 20, q: "20.- Mediana de los primeros 7 múltiplos positivos de 2", opts: ["2", "6", "8", "12"], ans: "C" },
+        { id: 21, q: "21.- Mediana de los factores primos de 90", opts: ["90", "2", "3", "5"], ans: "C" },
+        { id: 22, q: "22.- G(x)= x+1, cuando f(x-2)", opts: ["2x+2", "x-1", "1", "x+1"], ans: "B" },
+        { id: 23, q: "23.- F(x)= 2X² + 3, cuando f(2)", opts: ["19", "21", "x+3", "11"], ans: "D" },
+        { id: 24, q: "24.- F(x)= (X+4)², cuando f(3x)", opts: ["x²+4x+12", "9x²+4x+8", "x²+12x-16", "9x²+24x+16"], ans: "D" },
+        { id: 25, q: "25.- log₂2", opts: ["2", "1", "0", "Error"], ans: "B" },
+        { id: 26, q: "26.- log 1⁵", opts: ["2", "7", "0", "Error"], ans: "D" },
+        { id: 27, q: "27.- 3 log₂16", opts: ["8", "4", "14", "12"], ans: "D" },
+        { id: 28, q: "28.- ¿Qué valor de X hace que F(X)=2x-10 valga 8?", opts: ["8", "10", "9", "6"], ans: "C" },
+        { id: 29, q: "29.- ¿Qué valores de X hacen que F(X)=X²+18 valga 34?", opts: ["4", "8", "-8 y -8", "-4 y 4"], ans: "D" },
+        { id: 30, q: "30.- Si f(x)=10x-2 pasa por (2, n). ¿Cuánto vale n?", opts: ["8", "16", "18", "12"], ans: "C" },
+        { id: 31, q: "31.- Si f(x)=x-8 pasa por (2, n). ¿Es positiva o negativa?", opts: ["Positiva", "0", "Negativa", "Neutra"], ans: "C" },
+        { id: 32, q: "32.- Si f(x)=|2x-5|. ¿Cuánto es F(-1)?", opts: ["1", "5", "-7", "7"], ans: "D" },
+        { id: 33, q: "33.- Si f(x)=|4x+1|. ¿Cuánto es F(-5)?", opts: ["19", "17", "-17", "-19"], ans: "A" },
+        { id: 34, q: "34.- i⁶", opts: ["1", "i", "-i", "-1"], ans: "D" },
+        { id: 35, q: "35.- i¹¹", opts: ["1", "i", "-i", "-1"], ans: "C" },
+        { id: 36, q: "36.- i¹⁹", opts: ["1", "i", "-i", "-1"], ans: "C" },
+        { id: 37, q: "37.- i⁹⁹¹", opts: ["1", "i", "-i", "-1"], ans: "C" },
+        { id: 38, q: "38.- i²² * i¹⁵", opts: ["1", "i", "-i", "-1"], ans: "B" },
+        { id: 39, q: "39.- (3i)(2i)6i", opts: ["1", "i", "-i", "-36i"], ans: "D" },
+        { id: 40, q: "40.- √-25 * √-64", opts: ["40²", "40⁸", "-40i²", "-40"], ans: "D" },
+        { id: 41, q: "41.- √-32 * √-36 - √-4 * √-9", opts: ["4i", "4i√5", "4²", "4i√2"], ans: "D" },
+        { id: 42, q: "42.- √-20 * √-9 / √-5 * √-9", opts: ["2", "2/√5", "2i√5", "-2i"], ans: "A" }
+    ];
+
+    const container = document.getElementById('questions');
+    examData.forEach(item => {
+        const div = document.createElement('div');
+        div.className = 'question-card';
+        div.innerHTML = `
+            <span class="question-text">${item.q}</span>
+            <div class="options-grid">
+                ${item.opts.map((opt, idx) => `
+                    <label class="option-item">
+                        <input type="radio" name="q${item.id}" value="${['A','B','C','D'][idx]}">
+                        ${['A','B','C','D'][idx]}) ${opt}
+                    </label>
+                `).join('')}
+            </div>
+        `;
+        container.appendChild(div);
+    });
+
+    function grade() {
+        const name = document.getElementById('studentName').value;
+        if(!name) { alert("Por favor, ingrese su nombre."); return; }
+        let score = 0;
+        examData.forEach(item => {
+            const sel = document.querySelector(`input[name="q${item.id}"]:checked`);
+            if(sel && sel.value === item.ans) score++;
+        });
+        document.getElementById('quizForm').style.display = 'none';
+        document.getElementById('setup').style.display = 'none';
+        document.getElementById('result-area').style.display = 'block';
+        document.getElementById('res-name').innerText = "Alumno: " + name;
+        document.getElementById('res-score').innerText = score;
+        window.scrollTo(0,0);
+    }
+</script>
+</body>
+</html>
